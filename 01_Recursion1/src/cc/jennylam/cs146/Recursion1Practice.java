@@ -76,10 +76,7 @@ public class Recursion1Practice {
 	 * without any additions.
 	 */
 	public static String cleanHotelCollectTrashOnTheWayDown(int lo, int hi, String trash) {
-		if (lo > hi)
-			return trash;
-		System.out.printf("Cleaning room %d\n", lo);
-		return cleanHotelCollectTrashOnTheWayDown(lo + 1, hi, trash + ", trash from room " + lo);
+		return null;
 	}
 
 	

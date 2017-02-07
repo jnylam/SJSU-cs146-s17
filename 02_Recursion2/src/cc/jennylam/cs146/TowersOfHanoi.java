@@ -29,10 +29,15 @@ public class TowersOfHanoi {
 		// Then add a single call to moveTopDisk to see what happens.
 	}
 	
+	public void moveStack(int n, int fromPeg, int toPeg) {
+		int otherPeg = 3 - fromPeg - toPeg; // sum of the peg indices is 0 + 1 + 2 = 3
+	}
+	
 	public void moveTopDisk(int fromPeg, int toPeg) {
 		int disk = pegs.get(fromPeg).pop();
-		assert(pegs.get(toPeg).peek() > disk);
-		pegs.get(toPeg).push(disk);
+		Stack<Integer> peg = pegs.get(toPeg);
+		assert (peg.isEmpty() || peg.peek() > disk); // valid move
+		peg.push(disk);
 		if (verbose)
 			System.out.println(this);
 	}

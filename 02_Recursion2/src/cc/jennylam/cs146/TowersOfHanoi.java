@@ -27,10 +27,13 @@ public class TowersOfHanoi {
 		// Tip 1: you may find it helpful to break your code into multiple functions
 		// Tip 2: start by running the code as is
 		// Then add a single call to moveTopDisk to see what happens.
+	    // Hint: make an initial call to moveStack with the correct parameter values. 
+	    // Then finish implementing moveStack.
 	}
 	
 	public void moveStack(int n, int fromPeg, int toPeg) {
 		int otherPeg = 3 - fromPeg - toPeg; // sum of the peg indices is 0 + 1 + 2 = 3
+		// finish this implementation
 	}
 	
 	public void moveTopDisk(int fromPeg, int toPeg) {

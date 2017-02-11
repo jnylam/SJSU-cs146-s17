@@ -36,8 +36,8 @@ public class TreeNode<E extends Comparable<E>> {
 	}
 	
 	/*
-     * Return a list of the nodes in the tree rooted at the current node, ordered by in-order traversal.
-     */
+	 * Return a list of the nodes in the tree rooted at the current node, ordered by in-order traversal.
+	 */
 	public List<E> inorder() {
 		List<E> list = new ArrayList<>();
 		// left subtree
@@ -52,7 +52,6 @@ public class TreeNode<E extends Comparable<E>> {
 			List<E> rightList = right.inorder();
 			list.addAll(rightList);
 		}
-		
 		return list;
 	}
 	

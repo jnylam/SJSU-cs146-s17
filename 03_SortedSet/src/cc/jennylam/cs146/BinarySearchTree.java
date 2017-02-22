@@ -34,10 +34,10 @@ public class BinarySearchTree<E extends Comparable<E>> implements SortedSet<E> {
         Node node = root.find(e);
         if (node.value.compareTo(e) <= 0)
             return node.value;
-        Node successor = node.successor();
-        if (successor == null)
+        Node predecessor = node.predecessor();
+        if (predecessor == null)
             throw new NoSuchElementException();
-        return successor.value;
+        return predecessor.value;
     }
 
     @Override
@@ -47,10 +47,10 @@ public class BinarySearchTree<E extends Comparable<E>> implements SortedSet<E> {
         Node node = root.find(e);
         if (node.value.compareTo(e) >= 0)
             return node.value;
-        Node predecessor = node.predecessor();
-        if (predecessor == null)
+        Node successor = node.successor();
+        if (successor == null)
             throw new NoSuchElementException();
-        return predecessor.value;
+        return successor.value;
     }
 
     @Override

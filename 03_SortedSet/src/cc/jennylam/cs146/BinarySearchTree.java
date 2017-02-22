@@ -1,9 +1,9 @@
 package cc.jennylam.cs146;
 
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 public class BinarySearchTree<E extends Comparable<E>> implements SortedSet<E> {
     private Node root;
@@ -96,6 +96,11 @@ public class BinarySearchTree<E extends Comparable<E>> implements SortedSet<E> {
         return true;
     }
 
+    public int height() {
+        if (isEmpty())
+            return -1;
+        return root.height();
+    }
 
     private class Node {
         E value;
@@ -167,9 +172,13 @@ public class BinarySearchTree<E extends Comparable<E>> implements SortedSet<E> {
             return parent != null && this == parent.right;
         }
 
-        // Return a per-level list of the nodes in left to right order
-        List<List<E>> levels() {
-            throw new UnsupportedOperationException("not yet implemented");
+        int height() {
+            int max = -1;
+            if (left != null)
+                max = Integer.max(max, left.height());
+            if (right != null)
+                max = Integer.max(max, right.height());
+            return max + 1;
         }
     }
 
@@ -177,27 +186,69 @@ public class BinarySearchTree<E extends Comparable<E>> implements SortedSet<E> {
     public String toString() {
         if (isEmpty())
             return "()";
-        List<List<E>> levels = root.levels();
-        int maxWidth = levels.get(levels.size() - 1).size();
-        return levels.stream()
-                .map(level -> levelToString(level, maxWidth))
+        List<List<String>> levels = levels();
+        int height = height();
+        return IntStream.range(0, levels.size())
+                .mapToObj(i -> levelToString(levels.get(i), height - i))
                 .collect(Collectors.joining());
     }
 
-    private String levelToString(List<E> level, int maxWidth) {
-        int numGaps = maxWidth / level.size();
-        String gap = repeat(" ", numGaps);
-        String result = gap;
-        for (E e : level) {
-            result += e + gap;
+    private List<List<String>> levels() {
+        List<List<String>> levels = new ArrayList<>();
+        Queue<Node> queue = new LinkedList<>();
+        Node separator = new Node(null, null);
+        Node dummy = new Node(null, null);
+        int height = height();
+
+        queue.add(separator);
+        queue.add(root);
+        while (!queue.isEmpty()) {
+            Node node = queue.remove();
+            if (node == separator) {
+                levels.add(new ArrayList<>());
+                if (levels.size() - 1 < height)
+                    queue.add(separator);
+            } else {
+                levels.get(levels.size() - 1).add(node == dummy ? "" : node.value.toString());
+                if (levels.size() - 1 < height) {
+                    queue.add(node.left == null ? dummy : node.left);
+                    queue.add(node.right == null ? dummy : node.right);
+                }
+            }
         }
-        return result;
+        return levels;
+    }
+
+    private String levelToString(List<String> level, int height) {
+        long gapWidth = Math.round(Math.pow(2, height + 1) - 1);
+        long halfGapWidth = Math.round(Math.pow(2, height) - 1);
+        String gap = repeat(" ", gapWidth);
+        String halfGap = repeat(" ", halfGapWidth);
+        String BLANK = "";
+
+        String branches = halfGap;
+        String nodes = halfGap;
+        boolean left = true;
+        for (String e : level) {
+            if (e.equals(BLANK)) {
+                branches += " " + gap;
+                nodes += " " + gap;
+            } else {
+                branches += (left ? "/" : "\\") + gap;
+                nodes += e + gap;
+            }
+            left = !left;
+        }
+        branches += "\n";
+        nodes += "\n";
+        return (level.size() <= 1) ? nodes : branches + nodes;
     }
 
     // return a string consisting of the given string, repeated the given number of times.
-    private static String repeat(String str, int repeat) {
-        return IntStream.range(0, repeat)
+    private static String repeat(String str, long repeat) {
+        return LongStream.range(0, repeat)
                 .mapToObj(i -> str)
                 .collect(Collectors.joining());
     }
 }
+

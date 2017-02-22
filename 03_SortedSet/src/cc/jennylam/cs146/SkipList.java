@@ -72,7 +72,7 @@ public class SkipList<E extends Comparable<E>> implements SortedSet<E> {
     @Override
     public E floor(E e) {
         Node node = find(e);
-        if (node.right.xvalue.equals(e))
+        if (node.right.xvalue.compareTo(e) == 0)
             return e;
         if (node.xvalue.compareTo(Extended.negativeInfinity()) == 0)
             throw new NoSuchElementException();

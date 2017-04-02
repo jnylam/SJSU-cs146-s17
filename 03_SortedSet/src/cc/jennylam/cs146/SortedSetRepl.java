@@ -11,6 +11,7 @@ public class SortedSetRepl {
             "a [integer]  - add\n" +
             "r [integer]  - remove\n" +
             "c [integer]  - contains\n" +
+            "p [integer]  - Populates list w/ n elements iteratively starting at 0 -> n \n" +
             "s            - size\n" +
             "f            - first\n" +
             "l            - last\n" +
@@ -40,6 +41,8 @@ public class SortedSetRepl {
                 System.out.println(list);
             } else if (input.charAt(0) == 'c' && !Character.isAlphabetic(input.charAt(1)))
                 System.out.println(list.contains(Integer.valueOf(input.substring(1))));
+            else if (input.charAt(0) == 'p')
+              populateList(Integer.valueOf(input.substring(1)));
             else if (input.equals("s"))
                 System.out.println(list.size());
             else if (input.equals("f"))
@@ -71,6 +74,13 @@ public class SortedSetRepl {
             System.out.print("> ");
             evaluateAndPrint(scanner.nextLine());
         }
+    }
+
+    public void populateList(int n) {
+      for (int i = 0; i < n; i++) {
+        list.add(i);
+      }
+      System.out.println(list);
     }
 
     public SortedSetRepl() {

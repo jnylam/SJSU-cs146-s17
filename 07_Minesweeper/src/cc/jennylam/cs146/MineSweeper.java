@@ -1,3 +1,5 @@
+package cc.jennylam.cs146;
+
 class MineSweeper {
     private Board board;
     private boolean running;

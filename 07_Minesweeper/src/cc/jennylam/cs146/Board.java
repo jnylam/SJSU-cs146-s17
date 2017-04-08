@@ -1,3 +1,5 @@
+package cc.jennylam.cs146;
+
 import java.util.*;
 
 class Board {

@@ -47,50 +47,61 @@ public class View extends Application {
         primaryStage.setScene(scene);
         primaryStage.setTitle("Minesweeper");
         primaryStage.show();
-        draw();
+        drawScreen();
     }
 
     private void update(MouseEvent event) {
         if (!game.isRunning())
             return;
-        int cell = getCell(event);
-        if (event.getButton() == MouseButton.SECONDARY) {
-            updateFlags(cell);
-        } else if (game.isRunning()) {
+
+        // get cell
+        int row = Math.toIntExact(Math.round(Math.floor(event.getY() / cellSize)));
+        int col = Math.toIntExact(Math.round(Math.floor(event.getX() / cellSize)));
+        int cell = row * game.getBoard().getWidth() + col;
+
+        // update state at given cell
+        if (event.getButton() == MouseButton.SECONDARY)
+            toggleFlag(cell);
+        else
             game.update(cell);
-        }
-        draw();
-        if (!game.isRunning()) {
-            showFinishScreen(game.isWon());
-        }
+
+        drawScreen();
     }
 
-    private int getCell(MouseEvent event) {
-        double x = event.getX();
-        double y = event.getY();
-        int row = Math.toIntExact(Math.round(Math.floor(y / cellSize)));
-        int col = Math.toIntExact(Math.round(Math.floor(x / cellSize)));
-        return row * game.getBoard().getWidth() + col;
-    }
-
-    private void updateFlags(int cell) {
+    private void toggleFlag(int cell) {
         if (flags.contains(cell))
             flags.remove(cell);
         else
             flags.add(cell);
     }
 
-    private void draw() {
-        drawBoard(true);
-        drawGrid();
-        drawFlags();
-    }
-
-    private void drawBoard(boolean covered) {
-        int[][] board = covered ? game.getBoard().getCoveredView() : game.getBoard().getClearedView();
+    private void drawScreen() {
+        // draw board cells
+        int[][] board = game.isRunning() ? game.getBoard().getCoveredView() : game.getBoard().getClearedView();
         for (int i = 0; i < game.getBoard().getHeight(); i++)
             for (int j = 0; j < game.getBoard().getWidth(); j++)
                 drawCell(i, j, board[i][j]);
+
+        // draw flags
+        if (game.isRunning()) {
+            int w = game.getBoard().getWidth();
+            for (int c : flags) {
+                int i = c / w;
+                int j = c % w;
+                if (board[i][j] == Board.COVERED)
+                    drawFlag(i, j);
+            }
+        }
+
+        // draw grid lines
+        for (int i = 1; i < game.getBoard().getHeight(); i++)
+            drawHorizontalLine(i);
+        for (int j = 1; j < game.getBoard().getWidth(); j++)
+            drawVerticalLine(j);
+
+
+        if (!game.isRunning())
+            drawMessage(game.isWon());
     }
 
     private void drawCell(int row, int col, int value) {
@@ -114,46 +125,10 @@ public class View extends Application {
         }
     }
 
-    private void drawGrid() {
-        for (int i = 1; i < game.getBoard().getHeight(); i++)
-            drawHorizontalLine(i);
-        for (int j = 1; j < game.getBoard().getWidth(); j++)
-            drawVerticalLine(j);
-    }
-
-    private void drawHorizontalLine(int i) {
+    private void drawFlag(int row, int col) {
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        double x1 = 0;
-        double x2 = canvas.getWidth();
-        double y = i*cellSize;
-        gc.setStroke(GRAY);
-        gc.strokeLine(x1, y, x2, y);
-    }
-
-    private void drawVerticalLine(int j) {
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        double x = j*cellSize;
-        double y1 = 0;
-        double y2 = canvas.getHeight();
-        gc.setStroke(GRAY);
-        gc.strokeLine(x, y1, x, y2);
-    }
-
-    private void drawFlags() {
-        int w = game.getBoard().getWidth();
-        int[][] board = game.getBoard().getCoveredView();
-        for (int c : flags) {
-            int i = c/w;
-            int j = c%w;
-            if (board[i][j] == Board.COVERED)
-                drawFlag(i, j);
-        }
-    }
-
-    private void drawFlag(int i, int j) {
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        double x = j*cellSize + cellSize/2;
-        double y = i*cellSize + cellSize/2;
+        double x = col*cellSize + cellSize/2;
+        double y = row*cellSize + cellSize/2;
         double w = cellSize/6;
         double[] xPoints = { x-w, x-w, x+w };
         double[] yPoints = { y-w, y+w, y };
@@ -163,13 +138,26 @@ public class View extends Application {
         gc.strokePolygon(xPoints, yPoints, 3);
     }
 
-    private void showFinishScreen(boolean won) {
-        drawBoard(false);
-        drawGrid();
-        drawMessage(won);
+    private void drawHorizontalLine(int row) {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        double x1 = 0;
+        double x2 = canvas.getWidth();
+        double y = row*cellSize;
+        gc.setStroke(GRAY);
+        gc.strokeLine(x1, y, x2, y);
     }
 
-    private void drawMessage(boolean won) {
+    private void drawVerticalLine(int col) {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        double x = col*cellSize;
+        double y1 = 0;
+        double y2 = canvas.getHeight();
+        gc.setStroke(GRAY);
+        gc.strokeLine(x, y1, x, y2);
+    }
+
+   private void drawMessage(boolean won) {
+        String message = won ? "You win!" : "You lose!";
         double w = 2.5*cellSize;
         double pad = cellSize/3;
         double x = (canvas.getWidth()-w)/2;
@@ -179,10 +167,7 @@ public class View extends Application {
         gc.setStroke(BLACK);
         gc.fillRoundRect(x-pad, y-cellSize+pad, w, cellSize, pad, pad);
         gc.strokeRoundRect(x-pad, y-cellSize+pad, w, cellSize, pad, pad);
-        if (won)
-            gc.strokeText("You win!", x, y);
-        else
-            gc.strokeText("You lose!", x, y);
+        gc.strokeText(message, x, y);
     }
 
     public static void main(String[] args) {

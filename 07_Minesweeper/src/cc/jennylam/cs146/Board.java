@@ -3,20 +3,50 @@ package cc.jennylam.cs146;
 import java.util.*;
 
 class Board {
-    static int MINE = 9;
-    static int COVERED = 10;
+    final static int MINE = 9;
+    final static int COVERED = 10;
 
-    private int width;
-    private int height;
-    // cell c at row i and column j is an integer c = i*width + height
-    private Set<Integer> mines;   // cells c containing mines
-    private int[] mineField;      // cell c has a mine if mineField[c] == MINE
-                                  // otherwise, c has no mines but is adjacent to mineField[c]-many mines
-    private boolean[] sweptCells; // initially all entries have a value of false
-                                  // true represents a cell without a mine having been cleared or swept
-                                  // value of cell d changes on a call to sweep(c) if d is in the same "region"
-                                  // as c. Two cells without mines belong to the same region if there is a path
-                                  // of cells without mines that connects c to d.
+    // Board cells are represented by integers.
+    // Specifically, the cell at row i and column j is represented by the integer c = i*width + j
+    private final int width;
+    private final int height;
+    // The set of cell locations containing a mine
+    private final Set<Integer> mines;
+    // If mineField[c] == MINE, cell c has a mine
+    // Otherwise, c has no mines and mineField[c] is the number of mines next to c
+    private final int[] mineField;
+    // clearedCells[c] with a value of false means c is covered up and true means it has been cleared.
+    // All cells start out covered and become cleared through the clear() (and swept()) functions.
+    // Note: this variable used to be named "sweptCells" and has been renamed
+    private boolean[] clearedCells;
+
+    Board(int width, int height, int numMines) {
+        int n = width*height;
+        this.width = width;
+        this.height = height;
+        this.mines = new HashSet<>();
+        {    // generate mine locations
+            if (numMines >= n)
+                throw new AssertionError("too many mines for the size of this board");
+            Random random = new Random();
+            for (int k = 0; k < numMines; k++) {
+                int c = random.nextInt(n);
+                while (mines.contains(c))
+                    c = random.nextInt(n);
+                mines.add(c);
+            }
+        }
+        this.mineField = new int[n];
+        {    // create mine field
+            for (int c : mines)
+                mineField[c] = MINE;
+            for (int c : mines)
+                for (int a : adjacentCells(c))
+                    if (mineField[a] != MINE)
+                        mineField[a] += 1;
+        }
+        this.clearedCells = new boolean[n];
+    }
 
     int getWidth() {
         return width;
@@ -26,26 +56,24 @@ class Board {
         return height;
     }
 
-    Board(int width, int height, int mines) {
-        this.width = width;
-        this.height = height;
-        this.mines = generateMines(mines, height*width);
-        mineField = makeField();
-        sweptCells = new boolean[height*width];
+    int[][] getClearedView() {
+        return reshape(mineField, width);
+    }
+
+    int[][] getCoveredView() {
+        int[] coverField = cover(mineField, clearedCells);
+        return reshape(coverField, width);
     }
 
     boolean allClear() {
         int unclear = height*width;
-        for (boolean swept : sweptCells)
+        for (boolean swept : clearedCells)
             if (swept)
                 unclear--;
         return unclear <= mines.size();
     }
 
-    boolean clear(int row, int col) {
-        return clear(row*width + col);
-    }
-
+    // the function that is called when a user clicks on cell c
     boolean clear(Integer c) {
         if (mines.contains(c))
             return false;
@@ -54,57 +82,23 @@ class Board {
     }
 
     private void sweep(Integer c) {
-        sweptCells[c] = true;
+        clearedCells[c] = true; // set to true to clear cell c
         // TODO: implement sweeping by clearing all the cells in the same region as c.
-        // Hint: use a BFS traversal: clear all adjacent cells of c that do not contain a mine
-        // for each cleared adjacent cell, repeat the sweeping procedure to clear its neighbors, and so on.
-    }
 
-    private static Set<Integer> generateMines(int mines, int range) {
-        if (mines >= range)
-            throw new AssertionError("too many mines for this size");
-        Random r = new Random();
-        Set<Integer> mineLocations = new HashSet<>();
-        for (int k = 0; k < mines; k++) {
-            int c = r.nextInt(range);
-            while (mineLocations.contains(c))
-                c = r.nextInt(range);
-            mineLocations.add(c);
-        }
-        return mineLocations;
-    }
-
-    private int[] makeField() {
-        int[] mineField = new int[width*height];
-        for (int c : mines)
-            mineField[c] = MINE;
-        for (int c : mines)
-            for (int a : adjacentCells(c))
-                if (mineField[a] != MINE)
-                    mineField[a] += 1;
-        return mineField;
+        // Hint: use a BFS traversal: if c is not next to any mines (use mineField[c] to determine this information),
+        // clear all cells adjacent to c (you can use adjacentCells() as a helper function)
+        // for each cleared adjacent cell, if it is not next to any mines, clear all its adjacent cells, and so on.
     }
 
     private Set<Integer> adjacentCells(int c) {
+        Set<Integer> cells = new HashSet<>();
         int i = c/width;
         int j = c%width;
-        Set<Integer> cells = new HashSet<>();
-        for (int ii = Integer.max(0, i - 1); ii < Integer.min(height, i + 2); ii++) {
-            for (int jj = Integer.max(0, j - 1); jj < Integer.min(width, j + 2); jj++) {
+        for (int ii = Integer.max(0, i - 1); ii < Integer.min(height, i + 2); ii++)
+            for (int jj = Integer.max(0, j - 1); jj < Integer.min(width, j + 2); jj++)
                 cells.add(ii*width+jj);
-            }
-        }
         cells.remove(i*width + j);
         return cells;
-    }
-
-    int[][] getClearedView() {
-        return reshape(mineField, width);
-    }
-
-    int[][] getCoveredView() {
-        int[] coverField = cover(mineField, sweptCells);
-        return reshape(coverField, width);
     }
 
     private static int[] cover(int[] board, boolean[] sweptCells) {

@@ -5,8 +5,8 @@ class MineSweeper {
     private boolean running;
     private boolean won;
 
-    MineSweeper(int width, int height, int mines) {
-        board = new Board(width, height, mines);
+    MineSweeper(int width, int height, int numMines) {
+        board = new Board(width, height, numMines);
         running = true;
         won = false;
     }
@@ -24,11 +24,7 @@ class MineSweeper {
     }
 
     void update(int c) {
-        if (running)
-            updateBoard(c);
-    }
-
-    private void updateBoard(int c) {
+        if (!running) return;
         if (!board.clear(c)) {
             running = false;
         } else if (board.allClear()) {

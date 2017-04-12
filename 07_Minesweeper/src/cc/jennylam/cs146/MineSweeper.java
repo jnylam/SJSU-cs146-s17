@@ -1,7 +1,7 @@
 package cc.jennylam.cs146;
 
 class MineSweeper {
-    private Board board;
+    private final Board board;
     private boolean running;
     private boolean won;
 

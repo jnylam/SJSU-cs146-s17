@@ -18,14 +18,14 @@ class Board {
     // clearedCells[c] with a value of false means c is covered up and true means it has been cleared.
     // All cells start out covered and become cleared through the clear() (and swept()) functions.
     // Note: this variable used to be named "sweptCells" and has been renamed
-    private boolean[] clearedCells;
+    private final boolean[] clearedCells;
 
     Board(int width, int height, int numMines) {
         int n = width*height;
         this.width = width;
         this.height = height;
         this.mines = new HashSet<>();
-        {    // generate mine locations
+        {   // generate mine locations
             if (numMines >= n)
                 throw new AssertionError("too many mines for the size of this board");
             Random random = new Random();
@@ -37,7 +37,7 @@ class Board {
             }
         }
         this.mineField = new int[n];
-        {    // create mine field
+        {   // create mine field
             for (int c : mines)
                 mineField[c] = MINE;
             for (int c : mines)

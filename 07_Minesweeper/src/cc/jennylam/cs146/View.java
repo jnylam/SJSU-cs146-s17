@@ -24,10 +24,10 @@ public class View extends Application {
     private static final Color MINE_COLOR = Color.DARKMAGENTA;
     private static final Color FLAG_COLOR = Color.DARKRED;
 
-    private int cellSize;
-    private MineSweeper game;
-    private Set<Integer> flags;
-    private Canvas canvas;
+    private final int cellSize;
+    private final MineSweeper game;
+    private final Set<Integer> flags;
+    private final Canvas canvas;
 
     public View() {
         int width = 20;

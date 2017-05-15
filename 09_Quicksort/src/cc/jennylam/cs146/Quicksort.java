@@ -20,7 +20,7 @@ public class Quicksort {
         sort(a, p+1, j);
     }
 
-    // partition using a[i] as pivot, form i to j
+    // partition using a[i] as pivot, from i to j
     // and return the index of the pivot's new location
     private static int partition(int[] a, int i, int j) {
         // Step 1: move all the elements into 1 of 2 lists
